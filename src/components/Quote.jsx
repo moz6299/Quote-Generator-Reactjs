@@ -1,40 +1,32 @@
+/* eslint-disable */
 import React, { useEffect, useState } from "react";
 import "./Quote.css";
 import reload from "../assets/main-qimg-ae92b32bf2255fc758cf0ea8e4b76b18.webp";
 
 const Quote = () => {
-  const [Quote, setQuote] = useState([]);
-  const [index, setindex] = useState(0)
+  const [quotes, setQuotes] = useState([]);
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    const fetchquotes = async () => {
-      const response = await fetch("https://type.fit/api/quotes");
+    const fetchQuotes = async () => {
+      const url = "https://api.quotable.io/quotes";
+      const response = await fetch(url);
       const data = await response.json();
       console.log(data);
-     const modifiedData = data.map((item,index)=>{
-        if(item.author.includes('type.fit')){
-            item.author = item.author.replace(', type.fit', '.');
-        }
-        return item
-     })
-      setQuote(modifiedData)
-      
+      const modifiedData = data.results.map((item) => ({
+        text: item.content,
+        author: item.author || 'Unknown'
+      }));
+      setQuotes(modifiedData);
     };
-    fetchquotes();
+    fetchQuotes();
   }, []);
 
+  const handleReload = () => {
+    setIndex((prev) => (prev + 1 >= quotes.length ? 0 : prev + 1));
+  };
 
-  const handleReload = ()=>{
-    setindex((prev)=>{
-        if(prev+1 >=Quote.length){
-            return 0
-        }else{
-            return prev+1
-        }
-    })
-  }
-
-  if (Quote.length === 0) {
+  if (quotes.length === 0) {
     return <div>Loading...</div>;
   }
 
@@ -42,11 +34,11 @@ const Quote = () => {
     <div className="quote">
       <div className="quote-container">
         <div className="quote">
-          <h2>{Quote[index].text}</h2>
+          <h2>{quotes[index].text}</h2>
         </div>
         <hr />
-        <div className="authtor-icon">
-          <p>- {Quote[index].author}</p>
+        <div className="author-icon">
+          <p>- {quotes[index].author}</p>
           <img onClick={handleReload} src={reload} alt="Generate" />
         </div>
       </div>
